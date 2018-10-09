@@ -57,6 +57,13 @@ defmodule Romeo.Transports.TCP do
     |> ready()
   end
 
+  defp start_protocol(%Conn{features: %Conn.Features{registration?: true}} = conn) do
+    conn
+    |> start_stream(@ns_jabber_client)
+    |> negotiate_features()
+    |> register()
+  end
+
   defp start_protocol(%Conn{} = conn) do
     conn
     |> start_stream(@ns_jabber_client)
@@ -66,6 +73,14 @@ defmodule Romeo.Transports.TCP do
     |> bind()
     |> session()
     |> ready()
+  end
+
+  defp register(%Conn{} = conn) do
+    conn
+    |> Romeo.Register.registration!()
+    |> reset_parser()
+    |> start_stream()
+    |> negotiate_features();
   end
 
   defp start_stream(%Conn{jid: jid} = conn, xmlns \\ @ns_jabber_client) do
