@@ -7,7 +7,7 @@ defmodule Romeo.Register do
 
   def registration!(conn) do
     Logger.info fn -> "Registration started" end;
-    registration(conn);
+    registration(conn)
   end
 
   defp registration(
@@ -17,7 +17,7 @@ defmodule Romeo.Register do
            password: password
          } = conn) do
 #   TODO: make receive handler
-    conn
+    {:ok, conn} = conn
     |> mod.send(Romeo.Stanza.get_inband_register())
     |> mod.recv(fn conn, xmlel(name: "iq") = elem ->
       conn
@@ -26,5 +26,7 @@ defmodule Romeo.Register do
     |> mod.recv(fn conn, xmlel(name: "iq") ->
       conn
     end)
+    |> mod.send(Romeo.Stanza.end_stream());
+    conn
   end
 end
