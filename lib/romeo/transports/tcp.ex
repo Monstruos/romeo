@@ -63,10 +63,7 @@ defmodule Romeo.Transports.TCP do
     |> negotiate_features()
     |> maybe_start_tls()
     |> register()
-    |> authenticate()
-    |> bind()
-    |> session()
-    |> ready()
+    |> end_stream()
   end
 
   defp start_protocol(%Conn{} = conn) do
@@ -83,10 +80,11 @@ defmodule Romeo.Transports.TCP do
   defp register(%Conn{} = conn) do
     conn
     |> Romeo.Register.registration!()
-    |> IO.inspect()
-    |> start_stream()
-    |> negotiate_features()
-    |> maybe_start_tls()
+  end
+
+  defp end_stream(%Conn{} = conn) do
+    conn
+    |> send(Romeo.Stanza.end_stream())
   end
 
   defp start_stream(%Conn{jid: jid} = conn, xmlns \\ @ns_jabber_client) do
